@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -25,5 +26,21 @@ class AuthController extends Controller
         $token = $user->createToken('RegistrationToken')->accessToken;
 
         return response()->json(['token' => $token], 201);
+    }
+
+    public function login(Request $request)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if (!auth()->attempt($validatedData)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        $token = auth()->user()->createToken('LoginToken')->accessToken;
+
+        return response()->json(['token' => $token], 200);
     }
 }
